@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b84d8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Gestión Territorial">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>Gestión Territorial</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#eef8ff}body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+#app{position:fixed;inset:env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;width:100%;height:auto;border:0;background:#fff;display:none}
+.setup{height:100%;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#f6fcff,#dff4ff 50%,#168bdc)}.card{width:min(480px,100%);background:#fff;border-radius:28px;padding:28px;box-shadow:0 24px 70px rgba(0,70,130,.2)}h1{margin:0;color:#073e7d;font-size:32px;line-height:1}.accent{color:#0aa8eb}p{color:#587a9d;line-height:1.45}.field{margin:22px 0 12px}label{display:block;font-weight:700;color:#073e7d;margin-bottom:7px}input{width:100%;height:50px;border:1px solid #c9e2f2;border-radius:13px;padding:0 14px;font-size:16px}button{width:100%;height:52px;border:0;border-radius:13px;background:linear-gradient(90deg,#18b5eb,#0875d6);color:#fff;font-weight:700;font-size:16px}.hint{font-size:12px;color:#6c849d;margin-top:14px}.error{color:#b42318;font-size:13px;min-height:20px;margin-top:8px}
+</style>
+</head>
+<body>
+<iframe id="app" title="Gestión Territorial" allow="clipboard-read; clipboard-write"></iframe>
+<div id="setup" class="setup"><div class="card"><h1>Gestión <span class="accent">Territorial</span></h1><p>Configuración inicial de la aplicación.</p><div class="field"><label for="url">URL de la Web App</label><input id="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec"></div><button id="save">Guardar y abrir</button><div id="err" class="error"></div><div class="hint">Se configura una sola vez en este dispositivo. Usá la URL publicada que termina en <b>/exec</b>.</div></div></div>
+<script>
+const KEY='gt_webapp_url_v1';const app=document.getElementById('app'),setup=document.getElementById('setup'),url=document.getElementById('url'),err=document.getElementById('err');
+function valid(v){try{const u=new URL(v);return u.protocol==='https:'&&/script\.google\.com$/.test(u.hostname)&&/\/exec\/?$/.test(u.pathname)}catch(e){return false}}
+function openApp(v){setup.style.display='none';app.style.display='block';app.src=v}
+const saved=localStorage.getItem(KEY);if(saved&&valid(saved))openApp(saved);
+document.getElementById('save').onclick=()=>{const v=url.value.trim();if(!valid(v)){err.textContent='Pegá la URL publicada de Apps Script que termina en /exec.';return}localStorage.setItem(KEY,v);openApp(v)};
+if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'))}
+</script>
+</body></html>
