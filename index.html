@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Gestión Territorial">
-<link rel="manifest" href="./manifest.webmanifest">
+<link rel="manifest" href="./manifest.webmanifest?v=120">
 <link rel="icon" href="./icons/icon-192.png">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <title>Gestión Territorial</title>
@@ -16,6 +16,7 @@
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#eef8ff}body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
 #app{position:fixed;inset:env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;width:100%;height:auto;border:0;background:#fff;display:none}
 .setup{height:100%;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#f6fcff,#dff4ff 50%,#168bdc)}.card{width:min(480px,100%);background:#fff;border-radius:28px;padding:28px;box-shadow:0 24px 70px rgba(0,70,130,.2)}h1{margin:0;color:#073e7d;font-size:32px;line-height:1}.accent{color:#0aa8eb}p{color:#587a9d;line-height:1.45}.field{margin:22px 0 12px}label{display:block;font-weight:700;color:#073e7d;margin-bottom:7px}input{width:100%;height:50px;border:1px solid #c9e2f2;border-radius:13px;padding:0 14px;font-size:16px}button{width:100%;height:52px;border:0;border-radius:13px;background:linear-gradient(90deg,#18b5eb,#0875d6);color:#fff;font-weight:700;font-size:16px}.hint{font-size:12px;color:#6c849d;margin-top:14px}.error{color:#b42318;font-size:13px;min-height:20px;margin-top:8px}
+#installBar{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:99999;display:none;max-width:520px;margin:auto;background:#fff;border:1px solid #c9e2f2;border-radius:18px;padding:12px;box-shadow:0 14px 42px rgba(0,50,100,.25)}#installBar strong{display:block;color:#073e7d;margin-bottom:8px}#installBar button{height:46px}#installHelp{font-size:12px;color:#587a9d;margin-top:7px}
 </style>
 </head>
 <body>
@@ -27,6 +28,15 @@ function valid(v){try{const u=new URL(v);return u.protocol==='https:'&&/script\.
 function openApp(v){setup.style.display='none';app.style.display='block';app.src=v}
 const saved=localStorage.getItem(KEY);if(saved&&valid(saved))openApp(saved);
 document.getElementById('save').onclick=()=>{const v=url.value.trim();if(!valid(v)){err.textContent='Pegá la URL publicada de Apps Script que termina en /exec.';return}localStorage.setItem(KEY,v);openApp(v)};
-if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'))}
+let deferredInstallPrompt=null;
+const installBar=document.getElementById('installBar');
+const installBtn=document.getElementById('installBtn');
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;if(!isStandalone())installBar.style.display='block'});
+installBtn.addEventListener('click',async()=>{if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();const choice=await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installBar.style.display='none'});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;installBar.style.display='none'});
+if('serviceWorker'in navigator){window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=120',{scope:'./'});await reg.update()}catch(e){console.error('Service Worker:',e)}})}
+if(isStandalone())installBar.style.display='none';
 </script>
+<div id="installBar"><strong>Instalar Gestión Territorial</strong><button id="installBtn" type="button">Instalar aplicación</button><div id="installHelp">Se abrirá como una app independiente, sin la barra normal de Chrome.</div></div>
 </body></html>
